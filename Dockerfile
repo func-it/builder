@@ -16,8 +16,7 @@ RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway
 RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.7.3
 RUN go install github.com/favadi/protoc-go-inject-tag@latest
 RUN go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
-RUN go install github.com/99designs/gqlgen@latest
-RUN go install github.com/go-task/task/v3/cmd/task@latest
+RUN go install github.com/99designs/gqlgen@v0.17.55
 
 # Install Google API Protos
 RUN curl -OL https://github.com/googleapis/googleapis/archive/refs/heads/master.zip
