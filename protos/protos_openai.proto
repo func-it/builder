@@ -1,0 +1,84 @@
+syntax = "proto3";
+option go_package = "github.com/func-it/sogenio/x/protos;protos";
+package protos;
+//import "google/protobuf/empty.proto";
+import "protos_primitives.proto";
+
+message OpenAiMessageDetails{
+  string Role = 1;
+  string Username = 2;
+  OpenAiFunctionCall FunctionCall = 3;
+  repeated OpenAiToolCall ToolCalls = 4;
+  string ToolCallID = 5;
+  repeated OpenAiChatMessagePart MultiContent = 6;
+}
+
+message OpenAiFunctionCall {
+  string Name = 1;
+  string Arguments = 2;
+}
+
+message OpenAiToolCall {
+  // @gotags: gorm:"type:uuid;primary_key;default:uuid_generate_v4()"
+  string ID = 1;
+  Int32 Index = 2;
+  string ToolType = 3;
+  OpenAiFunctionCall Function = 4;
+}
+
+message OpenAiChatMessagePart{
+  string Type = 1;
+  string Text = 2;
+  OpenAiChatMessageImageURL ImageURL = 3;
+}
+
+message OpenAiChatMessageImageURL{
+  string URL = 1;
+  string Detail = 2;
+}
+
+message OpenAiThread {
+  string ID  = 1;
+  string AssistantID = 2;
+  string Name = 3;
+  string Description = 4;
+  string Status = 5;
+  string CreatedAt = 6;
+  string UpdatedAt = 7;
+  ThreadRequest ThreadRequest = 8;
+}
+
+message ThreadRequest {
+  repeated ThreadMessage Messages = 1;
+  map<string, string> Metadata = 2;
+}
+
+message ThreadMessage {
+  string Role = 1;
+  string Content = 2;
+  repeated string FileIds = 3;
+  map<string, string> Metadata = 4;
+}
+
+message OpenAiFunction {
+  string Name = 1;
+  string Description = 2;
+  string Parameters = 3;
+}
+
+message OpenAiTool {
+  string ToolType = 1;
+  OpenAiFunction FunctionDefinition = 2;
+}
+
+message OpenAiPromptTokensDetails {
+  int32 AudioTokens = 1;
+  int32 CachedTokens = 2;
+}
+
+message OpenAiUsage {
+  int32 PromptTokens = 1;
+  int32 CompletionTokens = 2;
+  int32 TotalTokens = 3;
+  OpenAiPromptTokensDetails PromptTokensDetails = 4;
+}

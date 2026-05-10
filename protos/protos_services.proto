@@ -1,0 +1,17 @@
+syntax = "proto3";
+option go_package = "github.com/func-it/sogenio/x/protos;protos";
+package protos;
+import "google/protobuf/empty.proto";
+import "protos_types.proto";
+
+service SpeechToText {
+  rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc SpeechToText(SpeechToTextRequest) returns (SpeechToTextResponse);
+}
+
+service OuterWorld {
+  rpc Ping(google.protobuf.Empty) returns (google.protobuf.Empty);
+  rpc AddToBlacklist(AddToBlackListRequest) returns (google.protobuf.Empty);
+  rpc GetBlacklist(google.protobuf.Empty) returns (BlackList);
+  rpc SubscribeBlacklist(google.protobuf.Empty) returns (stream BlackListed);
+}

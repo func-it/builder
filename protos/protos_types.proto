@@ -1,0 +1,453 @@
+syntax = "proto3";
+option go_package = "github.com/func-it/sogenio/x/protos;protos";
+package protos;
+import "protos_primitives.proto";
+import "protos_openai.proto";
+
+message Event {
+  string ID = 1;
+  string Source = 2;
+}
+
+message ServiceBatch {
+  repeated ServiceTask Tasks = 1;
+}
+
+message ServiceTask {
+  string Name = 10;
+  string Description = 11;
+  oneof Type {
+    NotifType Notif = 1;
+    TaskType Task = 2;
+  }
+
+  // FromTime is calculated in minutes from the start of the event
+  // negative  if the event is before the start of the event
+  // positive if the event is after the start of the event
+  oneof From {
+    // From =  EndTime + StartTime
+    int64 StartTime = 20;
+    // From =  EndTime + StartTime + DurationMinutes
+    int64 EndTime = 21;
+  }
+}
+
+enum NotifType {
+  to_provider = 0;
+  to_manager = 1;
+  to_operator = 2;
+  to_customer = 3;
+}
+
+enum TaskType {
+  for_owner = 0;
+  for_staff = 1;
+  for_customer = 2;
+}
+
+enum Currency {
+  USD = 0;
+  EUR = 1;
+  COP = 2;
+}
+
+message Price {
+  double Amount = 1;
+  Currency Currency = 2;
+}
+
+
+enum StaffRole {
+  staff_member = 0;
+  staff_manager = 1;
+  staff_operator = 2;
+}
+
+message Prices {
+  repeated Price Prices = 1;
+}
+
+message InfoCandidatesRequest {
+  ID OrchestratorID = 3;
+  map<string, InfoCandidate> Candidates = 1;
+}
+
+message InfoCandidates {
+  map<string, InfoCandidate> Candidates = 1;
+}
+
+message InfoCandidate {
+  string Question = 2;
+  string Answer = 3;
+  Time Time = 4;
+}
+
+message BlackListed {
+  // @gotags: gorm:"type:uuid;primary_key;default:uuid_generate_v4()"
+  ID ID = 1;
+
+  uint64 Number = 2;
+
+  // @gotags: gorm:"type:varchar(255);not null" validate:"required"
+  string Reason = 3;
+
+  // @gotags: gorm:"not null,type:timestamp" validate:"required"
+  Time Time = 4;
+}
+
+message BlackList {
+  repeated BlackListed BlackListed = 1;
+}
+
+message ChannelSummary {
+  string Note = 1;
+}
+
+enum BatchStrategy {
+  batch_strategy_parallel = 0;
+  batch_strategy_sequential = 1;
+}
+
+enum Status {
+  task_created = 0;
+  task_viewed = 2;
+  task_started = 5;
+  task_completed = 10;
+}
+
+enum Priority {
+  priority_low = 0;
+  priority_todo = 1;
+  priority_medium = 2;
+  priority_high = 3;
+  priority_urgent = 4;
+  priority_emergency = 5;
+}
+
+enum TaskScope {
+  task_scope_unknown = 0;
+  task_scope_customers = 1;
+  task_scope_internal = 2;
+  task_scope_configuration = 3;
+}
+
+enum Product {
+  feather = 0;
+  colibri = 1;
+  eagle = 2;
+  pegasus = 3;
+  hermes = 4;
+}
+
+enum ProductStatus {
+  status_unknown = 0;
+  created = 1;
+  paid = 2;
+}
+
+
+message Cloudbeds {
+  string APIKey = 1;
+  uint32 PropertyID = 2;
+}
+
+
+message CreateMessageRequest {
+  // @gotags: validate:"required"
+  ID ChannelID = 1;
+  // @gotags: validate:"required"
+  string Text = 2;
+  Time Time = 3;
+  OpenAiMessageDetails OpenAiDetails = 4;
+  bool IsFromOwner = 5;
+  ID ChatCompletionID = 6;
+}
+
+
+message RegisterOrchestratorRequest {
+  string DeviceID = 1;
+  string Username = 2;
+  //  Orchestrator Orchestrator = 2;
+}
+
+message IpInfo {
+  string ip = 1;
+  string hostname = 2;
+  string city = 3;
+  string region = 4;
+  string country = 5;
+  string loc = 6;
+  string org = 7;
+  string postal = 8;
+  string timezone = 9;
+  string language = 10;
+}
+
+message InitNewOrchestratorRequest {
+  string BusinessName = 11;
+  string BusinessDescription = 12;
+  IpInfo IpInfo = 14;
+  string ManagerName = 15;
+  uint64 ManagerNumber = 16;
+}
+
+message WhatsappRegisterOrchestratorRequest {
+  int32 number = 1;
+}
+
+message LinkDeviceToOrchestratorRequest {
+  string DeviceID = 1;
+  ID OrchestratorID = 2;
+  string Username = 3;
+}
+
+message WhatsappRegisterOrchestratorResponse {
+  string QRCode = 1;
+}
+
+message WhatsappApiListWid {
+  repeated uint64 Wids = 1;
+}
+
+message SpeechToTextRequest {
+  string sourceExtension = 1;
+  bytes data = 2;
+}
+message SpeechToTextResponse {
+  string text = 1;
+}
+
+message NotifyStaffRequest {
+
+}
+
+message NewThreadRequest {
+  uint64 DeviceJID = 1;
+  string Name = 2;
+  repeated uint64 Participants = 3;
+  ChannelSummary Summary = 4;
+  string OrchestratorName = 5;
+  string LastUserMessage = 6;
+  string Username = 7;
+  string FirstMessage = 8;
+  string GroupImagePrompt = 9;
+}
+
+message Thread {
+  ID ID = 1;
+
+  Time CreatedAt = 100;
+  Time UpdatedAt = 101;
+}
+
+message ChatGroupRequest {
+  uint64 DeviceJID = 1;
+  string Name = 2;
+  repeated uint64 Participants = 3;
+}
+
+message ChatGroupResponse {
+  string WhatsappChatJID = 1;
+}
+
+message Master {
+  //  string Name = 1;
+  uint64 Number = 2;
+}
+
+message ClearChatRequest {
+  string DeviceJID = 1;
+  string ChatJID = 2;
+  ID ChannelID = 3;
+  string Reason = 4;
+}
+
+message CreateGroupImage {
+  uint64 DeviceJID = 1;
+  string ChatJID = 2;
+  string Prompt = 3;
+}
+
+message AddToBlackListRequest {
+  BlackListed BlackListed = 1;
+}
+
+message ChatCompletion{
+  // @gotags: gorm:"type:uuid;primary_key;default:uuid_generate_v4()"
+  ID ID = 1;
+  string Caller = 2;
+  // @gotags: gorm:"type:json"
+  ChatCompletionRequest Request = 3;
+  // @gotags: gorm:"type:json"
+  ChatCompletionResponse Response = 4;
+
+  LLmModel Model = 5;
+
+  string ToName = 7;
+  uint64 ToPhoneNumber = 8;
+
+  Time Timestamp = 9;
+  string Message = 10;
+  string ErrorMessage = 11;
+  string Purpose = 12;
+  double PromptCost = 14;
+  double CompletionCost = 15;
+  string OrchestratorName = 16;
+  string OrchestratorID = 17;
+  string ChannelID = 22;
+  string MessageID = 23;
+  string Function = 18;
+  string MethodID = 19;
+  string BusinessName = 21;
+  string OpenAiRequest = 24;
+  string OpenAiResponse = 32;
+  // Duration of the LLM API call in milliseconds
+  // @gotags: gorm:"default:0"
+  int64 DurationMs = 33;
+  string EventID = 25;
+  string VersionNumber = 26;
+  string Environment = 27;
+  // @gotags: gorm:"type:uuid"
+  string ResonanceID = 28;
+  // Status of the associated resonance (populated by API, not stored in DB)
+  // @gotags: gorm:"-"
+  ResonanceStatus ResonanceStatus = 29;
+  // Initial message received from customer (populated by API from Resonance, not stored in DB)
+  // @gotags: gorm:"-"
+  string ResonanceMessageReceived = 30;
+  // Final message sent to customer (populated by API from Resonance, not stored in DB)
+  // @gotags: gorm:"-"
+  string ResonanceMessageSent = 31;
+}
+
+// ResonanceStatus represents the lifecycle state of a resonance session
+enum ResonanceStatus {
+  RESONANCE_STATUS_UNSPECIFIED = 0;
+  RESONANCE_STATUS_IN_PROGRESS = 1;
+  RESONANCE_STATUS_COMPLETED = 2;
+  RESONANCE_STATUS_FAILED = 3;
+  RESONANCE_STATUS_STALLED = 4;  // Marked by cron after 3 min without update
+}
+
+// Resonance groups all completions from a single LiveReact session
+// It tracks the full lifecycle of an AI interaction from message received to response sent
+message Resonance {
+  // @gotags: gorm:"type:uuid;primary_key;default:uuid_generate_v4()"
+  ID ID = 1;
+  // @gotags: gorm:"type:uuid;not null"
+  string ChannelID = 2;
+  // @gotags: gorm:"type:uuid;not null"
+  string OrchestratorID = 3;
+  // @gotags: gorm:"type:varchar(255)"
+  string EventID = 4;
+  // @gotags: gorm:"type:int;not null;default:1"
+  ResonanceStatus Status = 5;
+  // @gotags: gorm:"not null"
+  Time StartedAt = 6;
+  Time EndedAt = 7;
+  // @gotags: gorm:"type:text"
+  string MessageReceived = 8;
+  // @gotags: gorm:"type:text"
+  string MessageSent = 9;
+  // @gotags: gorm:"type:varchar(255)"
+  string ToName = 10;
+  uint64 ToPhoneNumber = 11;
+  // @gotags: gorm:"type:varchar(50)"
+  string Environment = 12;
+  // @gotags: gorm:"type:varchar(50)"
+  string VersionNumber = 13;
+  // @gotags: gorm:"type:varchar(100)"
+  string AgentFunction = 14;
+  // @gotags: gorm:"-"
+  repeated ChatCompletion Completions = 15;
+  // Duration in milliseconds (EndedAt - StartedAt), set when resonance completes
+  // @gotags: gorm:"default:0"
+  int64 DurationMs = 16;
+}
+
+message LLmModel {
+  string Host = 1;
+  string Name = 2;
+  string ApiKey = 3;
+  string Note = 4;
+  double PromptTokenPrice = 14;
+  double CompletionTokenPrice = 15;
+}
+
+message ChatCompletionRequest{
+  string Model = 1;
+  repeated ChatCompletionMessage Messages = 2;
+  int32 MaxTokens = 3;
+  float Temperature = 4;
+  float TopP = 5;
+  int32 N = 6;
+  bool Stream = 7;
+  repeated string Stop = 8;
+  float PresencePenalty = 9;
+  repeated OpenAiTool Tools = 10;
+}
+
+message ChatCompletionResponse{
+  string ID = 1;
+  string Object = 2;
+  int64 Created = 3;
+  string Model = 4;
+  repeated ChatCompletionChoice Choices = 5;
+  OpenAiUsage Usage = 6;
+  string SystemFingerprint = 7;
+}
+
+message ChatCompletionChoice{
+  int32 Index = 1;
+  string FinishReason = 2;
+  ChatCompletionMessage Message = 3;
+}
+
+message ChatCompletionList{
+  repeated ChatCompletion ChatCompletions = 1;
+}
+
+message ChatCompletionMessage {
+  string Role = 1;
+  string Content = 2;
+  string Name = 3;
+  OpenAiFunctionCall FunctionCall = 4;
+  repeated OpenAiToolCall ToolCalls = 5;
+  string ToolCallID = 6;
+  repeated OpenAiChatMessagePart MultiContent = 7;
+}
+
+message SystemAutoTrainingApprovalRequest {
+  string ID = 1;
+  InfoCandidate QACandidate = 2;
+  ID OrchestratorID = 3;
+}
+
+message CheckChannelTasksRequest {
+  ID ChannelID = 1;
+}
+
+enum Mood {
+  neutral = 0;
+  furious = -5;
+  angry = -4;
+  disturbed = -3;
+  unhappy = -2;
+  disappointed = -1;
+  OK = 1;
+  happy= 2;
+  enthusiastic = 3;
+  excited = 4;
+  thrilled = 5;
+}
+
+message SendMessageToChannelRequest {
+  string UUID = 1;
+  SendMessageToChannelBody Body = 2;
+}
+
+message SendMessageToChannelBody {
+  string Message = 2;
+  string Author = 3;
+}
+

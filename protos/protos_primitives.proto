@@ -1,0 +1,58 @@
+syntax = "proto3";
+option go_package = "github.com/func-it/sogenio/x/protos;protos";
+package protos;
+import "google/protobuf/timestamp.proto";
+
+message ID {
+  string UUID = 1;
+}
+
+message Bool {
+  bool B = 1;
+}
+
+message String {
+  string S = 1;
+}
+
+message Transaction {
+  string UUID = 1;
+}
+
+message Uint64 {
+  uint64 U = 1;
+}
+
+message Int64 {
+  int64 I = 1;
+}
+
+message Int32 {
+  int32 I = 1;
+}
+
+message Float64 {
+  double D = 1;
+}
+
+message Time {
+  google.protobuf.Timestamp T = 1;
+  string timezone = 2;  // Timezone information
+}
+
+message ArrayString {
+  repeated string Strings = 1;
+}
+
+message ArrayInt32 {
+  repeated int32 Ints = 1;
+}
+
+message MapString {
+  map<string, string> Strings = 1;
+}
+
+enum Order {
+  DESC = 0;
+  ASC = 1;
+}

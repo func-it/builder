@@ -1,6 +1,31 @@
 version: "3"
 
+vars:
+  IMAGE: ghcr.io/func-it/builder
+  ALIAS: ghcr.io/func-it/protoc
+  PLATFORMS: linux/amd64,linux/arm64
+  DATE_TAG:
+    sh: date -u +%Y-%m-%d
+
 tasks:
   default:
-    desc: Build the binary
-    cmd: docker buildx build --platform linux/amd64,linux/arm64 -t ghcr.io/func-it/builder:latest . --push
+    desc: Build + push multi-arch as builder:latest AND protoc:latest (back-compat alias).
+    cmd: |
+      docker buildx build --platform {{.PLATFORMS}} \
+        -t {{.IMAGE}}:latest \
+        -t {{.ALIAS}}:latest \
+        . --push
+
+  dry-build:
+    desc: Local single-arch build (host arch) for testing — no push.
+    cmd: docker build -t {{.IMAGE}}:dev .
+
+  tag-versioned:
+    desc: Build + push multi-arch with latest + YYYY-MM-DD tag (and protoc alias).
+    cmd: |
+      docker buildx build --platform {{.PLATFORMS}} \
+        -t {{.IMAGE}}:latest \
+        -t {{.IMAGE}}:{{.DATE_TAG}} \
+        -t {{.ALIAS}}:latest \
+        -t {{.ALIAS}}:{{.DATE_TAG}} \
+        . --push

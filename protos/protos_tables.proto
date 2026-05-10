@@ -1,0 +1,78 @@
+syntax = "proto3";
+option go_package = "github.com/func-it/sogenio/x/protos;protos";
+package protos;
+import "protos_primitives.proto";
+import "protos_types.proto";
+import "protos_openai.proto";
+
+message Orchestrator {
+  ID ID = 1;
+  uint64 PhoneNumber = 2;
+  bool Activated = 3;
+  bool IsReady = 4;
+  string Name = 10;
+  string Description = 11;
+  string StripeCustomerID = 14;
+  string StripeSubscriptionID = 15;
+  Product Product = 18;
+  ProductStatus ProductStatus = 19;
+  repeated Channel Channels = 20;
+  string BusinessName = 30;
+  string BusinessAddress = 31;
+  string BusinessDescription = 32;
+  MapString Instructions = 50;
+  MapString Infos = 51;
+
+  string GoogleMap = 70;
+  string IP = 71;
+  string Hostname = 72;
+  string City = 73;
+  string Region = 74;
+  string Country = 75;
+  string Loc = 76;
+  string Org = 77;
+  string Postal = 78;
+  string Timezone = 79;
+  string Language = 80;
+  string Currency = 81;
+
+  Time CreatedAt = 100;
+  Time UpdatedAt = 101;
+}
+
+message Channel {
+  ID ID = 1;
+  string ProviderID = 4;
+  ID UserID = 7;
+  User User = 8;
+  repeated Message Messages = 20;
+  bool Ignored = 30;
+  string Description = 31;
+  string Insight = 32;
+  Mood Mood = 33;
+  string DiscordID = 40;
+  Time CreatedAt = 100;
+  Time UpdatedAt = 101;
+}
+
+message Message {
+  ID ID = 1;
+  string ProviderID = 2;
+  ID ChannelID = 3;
+  string Content = 4;
+  Time Time = 5;
+  OpenAiMessageDetails OpenAiDetails = 6;
+  ID ChatCompletionID = 8;
+}
+
+message User {
+  ID ID = 1;
+  string Name = 2;
+  uint64 PhoneNumber = 4;
+  String Language = 5;
+}
+
+message OrchestratorOverview {
+  repeated Orchestrator Orchestrators = 1;
+}
+

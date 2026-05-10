@@ -1,0 +1,125 @@
+syntax = "proto3";
+option go_package = "github.com/func-it/sogenio/x/protos;protos";
+package protos;
+import "protos_primitives.proto";
+import "protos_types.proto";
+import "protos_openai.proto";
+
+message WhatsappDestination {
+  uint64 WhatsappDeviceJID = 1;
+  string WhatsappChatJID = 2;
+  string Topic = 3;
+  string WhatsappMessageID = 4;
+  repeated string WhatsappMessageIDs = 5; // All message IDs for mark-as-read
+  bool UseMeta = 6; // Use Meta WhatsApp API instead of whatsmeow
+  bool DisableTyping = 7; // Disable typing indicators (Full API mode)
+  string MessengerID = 8; // Messenger UUID for gateway lookup (new multi-messenger system)
+}
+
+message IncomingMessage {
+  WhatsappDestination Destination = 1;
+  string Content = 3;
+  bool IsFromMe = 4;
+  string username = 5;
+  Time timestamp = 6;
+  uint64 ReceiverID = 8; // typically the phone number
+  uint64 SenderID = 9; // typically the phone number
+  bool IsGroup = 10;
+  String GroupName = 11;
+  Transaction transaction = 12;
+  string MessageID = 13;
+
+  // Multi-part content support (for images, mixed media)
+  repeated OpenAiChatMessagePart MultiContent = 14;
+  // All message IDs for mark-as-read when batch processing
+  repeated string MessageIDs = 15;
+
+  // Language hint from messaging platform (ISO 639-1: "fr", "en", "es", etc.)
+  // Used by init agent when message content has no language signal (e.g., "/start")
+  string SenderLanguageHint = 16;
+
+  // Media fields (for rich chat: images, audio, video, documents)
+  string MediaType = 17;     // "image", "audio", "video", "document"
+  string MediaUrl = 18;      // public MinIO URL
+  string MimeType = 19;      // e.g. "image/jpeg"
+  string FileName = 20;      // original filename
+  int64 FileSize = 21;       // bytes
+  int32 MediaDuration = 22;  // seconds, audio/video only
+
+  Event Event = 100;
+}
+
+message SystemMessage {
+  ID orchestratorID = 1;
+  ID channelID = 2;
+  string chatID = 4;
+  string Content = 5;
+  Time timestamp = 6;
+}
+
+message Reaction {
+  string SenderJID = 1;
+  string MessageID = 2;
+  string Reaction = 3;
+}
+
+message ImageFile {
+  string Filename = 2;
+  bytes Data = 3;
+}
+
+message OutgoingMessage {
+//  uint64 WhatsappDeviceJID = 1;
+//  string WhatsappChatJID = 2;
+  oneof Content {
+    string Text = 3;
+    Reaction Reaction = 4;
+    ImageFile Image = 5;
+    string VCard = 6;
+    string Typing = 7;
+    TypingStop TypingStop = 9;
+  }
+  WhatsappDestination Destination = 8;
+  ID MessageID = 10;
+  string Emoji = 11;
+  Event Event = 100;
+}
+
+message TypingStop {
+  string ChatJID = 1;
+}
+
+message WhatsappChat {
+  string JID = 1;
+}
+
+message WhatsappMessageSent {
+  ID MessageID = 1;
+  string WhatsappMessageID = 2;
+}
+
+message WhatsappEventReceipt {
+  repeated string WhatsappMessageID = 1;
+  WhatsappReceiptType Type = 2;
+}
+
+enum WhatsappReceiptType {
+  message_delivered = 0;
+  message_read = 1;
+}
+
+// Channel events for ReAct loop interruption
+// These events are published to Kafka when customer typing status changes
+enum ChannelEventType {
+  channel_event_unknown = 0;
+  channel_event_typing_start = 1;
+  channel_event_typing_stop = 2;
+  channel_event_new_message = 3;
+}
+
+message ChannelEvent {
+  ChannelEventType Type = 1;
+  string ChannelID = 2;  // Format: deviceJID:chatID
+  Time Timestamp = 3;
+  IncomingMessage Message = 4;  // The new message (only for channel_event_new_message)
+}
