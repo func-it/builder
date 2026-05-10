@@ -20,6 +20,24 @@ tasks:
     desc: Local single-arch build (host arch) for testing — no push.
     cmd: docker build -t {{.IMAGE}}:dev .
 
+  ensure:
+    desc: Make sure {{.IMAGE}}:latest is available locally — pull from ghcr first, fall back to a local build if pull fails.
+    silent: true
+    cmds:
+      - |
+        if docker image inspect {{.IMAGE}}:latest >/dev/null 2>&1; then
+          echo "✓ {{.IMAGE}}:latest already local — skipping pull/build"
+          exit 0
+        fi
+        echo "▸ pulling {{.IMAGE}}:latest from ghcr.io"
+        if docker pull {{.IMAGE}}:latest 2>&1 | tail -1; then
+          echo "✓ pulled {{.IMAGE}}:latest"
+          exit 0
+        fi
+        echo "  pull failed (offline / no auth?) — building locally for host arch"
+        docker build -t {{.IMAGE}}:latest .
+        echo "✓ built {{.IMAGE}}:latest locally"
+
   tag-versioned:
     desc: Build + push multi-arch with latest + YYYY-MM-DD tag (and protoc alias).
     cmd: |
